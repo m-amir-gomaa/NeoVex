@@ -1,0 +1,132 @@
+@startuml
+title Class Diagram: NeoVex Rust Agentic Core — Struct/Trait Hierarchy
+' Version: 0.1.0 — update when Rust struct/impl interfaces change
+' Reading guide: boxes = structs + impl blocks (like .h files), arrows = ownership/calls
+' *-- = owns (struct field, not a pointer), o-- = borrows (Arc<T>), ..|> = impl Trait
+
+skinparam classAttributeIconSize 0
+
+' ─── Core Trait (like a vtable / interface) ───────────────────────────────────
+interface Agent <<trait>> {
+  +delegate_task(input: Task) -> Result<Response>
+  +orchestrate(agents: Vec<Box<dyn Agent>>) -> Outcome
+  +health_check() -> Status
+}
+
+' ─── rig crate ────────────────────────────────────────────────────────────────
+class AgentOrchestrator <<rig crate>> {
+  -pipeline: Pipeline<Task, Response>
+  -concurrency_limit: usize
+  -retry_policy: RetryPolicy
+  -sub_agents: Vec<AgentHandle>
+  +new(config: OrchestratorConfig) -> Self
+  +run_loop(tasks: Vec<Task>) -> Vec<Response>
+  +spawn_sub_agent(spec: AgentSpec) -> AgentHandle
+  +cancel_task(id: TaskId)
+}
+
+' ─── agentai crate ────────────────────────────────────────────────────────────
+class ToolCaller <<agentai crate>> {
+  -tools: HashMap<String, Box<dyn Tool>>
+  -llm_client: GeminiClient
+  -timeout: Duration
+  +call_tool(name: &str, args: Args) -> Result<Output>
+  +register_tool(name: &str, tool: impl Tool)
+  +stream_response(prompt: &str) -> Stream<Token>
+  +integrate_llm(model: GeminiModel)
+}
+
+' ─── ADK-Rust crate ───────────────────────────────────────────────────────────
+class StateManager <<ADK-Rust crate>> {
+  -state: Arc<Mutex<HashMap<String, Value>>>
+  -history: VecDeque<StateSnapshot>
+  -persistence: Option<StorageBackend>
+  +update_state(key: &str, value: Value)
+  +get_state(key: &str) -> Option<Value>
+  +snapshot() -> StateSnapshot
+  +rollback(snapshot: StateSnapshot)
+  ' Arc<Mutex<T>> = thread-safe without GIL
+  ' equivalent to pthread_mutex_t + shared_ptr in C
+}
+
+' ─── axum server ──────────────────────────────────────────────────────────────
+class RustAgentServer <<axum + tokio>> {
+  -orchestrator: AgentOrchestrator
+  -state_mgr: StateManager
+  -model_router: ModelRouter
+  -addr: SocketAddr
+  +start(port: u16) -> JoinHandle
+  +handle_request(req: Request) -> Response
+  +expose_wasm_module() -> WasmBytes
+  ' Listens on localhost:7777
+  ' This is the ORCHESTRATION layer, not inference
+}
+
+' ─── model routing layer ──────────────────────────────────────────────────────
+class ModelRouter <<cloud-first — Principle 7>> {
+  -provider_hierarchy: Vec<CloudProvider>
+  -budget_tracker: BudgetTracker
+  -ollama_client: Option<OllamaClient>
+  +route(task: &Task) -> InferenceTarget
+  +check_quota(provider: &Provider) -> QuotaStatus
+  +fallback_to_ollama() -> DegradedResponse
+  +get_remaining_budget() -> BudgetSummary
+  ' Cloud always first. Ollama = last resort only.
+}
+
+' ─── mlua bridge ──────────────────────────────────────────────────────────────
+class NvimIntegration <<mlua bridge>> {
+  -server_url: String
+  -lua_runtime: Lua
+  +expose_endpoint(cmd: &str, handler: Fn)
+  +ffi_bind(plugin_fn: LuaFunction)
+  +send_to_server(payload: Json) -> Json
+  +register_keymaps(nvim: &Neovim)
+  +surface_routing_status(status: BudgetSummary)
+}
+
+' ─── MCP layer (external data only) ──────────────────────────────────────────
+class McpClient <<external data layer — not ERS tool path>> {
+  -servers: Vec<McpServerConfig>
+  -sampling_router: Arc<ModelRouter>
+  +query_resource(server: &str, uri: &str) -> Resource
+  +call_mcp_tool(server: &str, tool: &str, args: Args) -> Output
+  ' Sampling calls MUST route through ModelRouter
+  ' to enforce cloud-first budget governance (Principle 7)
+}
+
+' ─── Relationships ────────────────────────────────────────────────────────────
+AgentOrchestrator ..|> Agent
+ToolCaller ..|> Agent
+
+' owns (struct field = not a pointer, like embedding in C)
+RustAgentServer "1" *-- "1" AgentOrchestrator : owns
+RustAgentServer "1" *-- "1" StateManager : owns
+RustAgentServer "1" *-- "1" ModelRouter : owns
+
+' composes (shared reference = Arc<T>)
+StateManager "1" o-- "1" AgentOrchestrator : Arc<T> ref
+AgentOrchestrator "1" *-- "many" ToolCaller : owns
+
+' calls / depends on
+NvimIntegration --> RustAgentServer : HTTP POST localhost:7777
+NvimIntegration ..> AgentOrchestrator : via FFI or WASM
+McpClient --> ModelRouter : routes Sampling calls through budget layer
+ToolCaller --> McpClient : external data queries only
+
+note bottom of StateManager
+  Arc<Mutex<T>> = Rust's thread-safe shared ownership.
+  C equivalent: shared_ptr<T> + pthread_mutex_t.
+  Replaces Python GIL with Rust ownership model.
+  Optional disk persistence via StorageBackend.
+end note
+
+note right of ModelRouter
+  Provider hierarchy example:
+  1. Gemini 3 Pro (primary)
+  2. Claude Opus (secondary)
+  3. GPT-4o (tertiary)
+  4. Ollama (LAST RESORT — loud UI warning)
+end note
+
+@enduml

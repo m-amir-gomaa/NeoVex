@@ -1,0 +1,67 @@
+@startuml
+title Sequence Diagram: NeoVex Agentic Task Flow (e.g., Code Refactoring)
+' Version: 0.1.0 — update this diagram whenever the task flow changes
+' Reading guide: vertical lines = processes, horizontal arrows = calls/IPC, time flows downward
+' Mental model: read this like strace output across multiple processes
+
+actor User <<Implementer / Sovereign Reviewer — Principle 10>>
+actor AISpecialist <<Designer / PR Submitter — no merge authority>>
+participant Neovim
+participant NvimPlugin <<mlua Lua/Rust FFI>>
+participant RustServer <<axum localhost:7777>>
+participant Gemini <<Primary Cloud LLM>>
+participant Ollama <<Fallback — Last Resort Only>>
+
+autonumber
+
+User -> Neovim : Trigger :AgentRefactor (keybinding)
+Neovim -> NvimPlugin : Invoke plugin logic via Lua/Rust FFI
+
+alt Primary Path — Custom Rust Bridge (Principle 9)
+  NvimPlugin -> RustServer : HTTP POST /refactor\n{code context, task description, file path}
+  activate RustServer
+
+  loop Agent Orchestration Loop (rig pipeline)
+    RustServer -> Gemini : Delegate sub-task via agentai ToolCaller\n"Suggest refactor with safety and correctness checks"
+    Gemini --> RustServer : Response (code delta, reasoning)
+    RustServer -> RustServer : Validate via rig pipeline\nUpdate StateManager (Arc<Mutex<T>>)
+  end
+
+  alt Cloud quota available (normal case)
+    RustServer --> NvimPlugin : Return processed result (JSON)
+  else Cloud quota exhausted mid-task
+    RustServer --> NvimPlugin : ⚠ QUOTA FLAG\nOption A: switch provider\nOption B: continue on Ollama (degraded)\nOption C: abort and preserve state
+    NvimPlugin --> Neovim : Surface options to User
+    User -> NvimPlugin : Select option
+    opt User selects Ollama fallback
+      RustServer -> Ollama : Re-route with quality-degradation warning
+      Ollama --> RustServer : Degraded response
+      RustServer --> NvimPlugin : Result + prominent degradation indicator
+    end
+  end
+
+  deactivate RustServer
+
+else Fallback Path — Existing Plugin (when rust_agent_server unavailable)
+  NvimPlugin -> Neovim : Route to avante.nvim / opencode.nvim
+  Neovim -> Gemini : Proxy API call via plugin auth
+  Gemini --> Neovim : Response
+  Neovim --> NvimPlugin : Forward result
+end
+
+NvimPlugin --> Neovim : Apply buffer edits
+Neovim --> User : Display refactored code + routing indicator (model/provider/budget)
+
+note over AISpecialist, RustServer
+  Collaboration (Principle 10):
+  AISpecialist designs new agent module logic in Antigravity,
+  submits PR. User reviews Rust code, approves, merges.
+  AISpecialist PR is a proposal — never a commit.
+end note
+
+AISpecialist -> RustServer : PR: new agent module (proposal only)
+User -> RustServer : Code review in Antigravity
+User -> RustServer : Approve and implement in Rust
+User -> Neovim : Test integration end-to-end
+
+@enduml

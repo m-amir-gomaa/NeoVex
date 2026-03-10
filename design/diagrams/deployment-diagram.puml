@@ -1,0 +1,106 @@
+@startuml
+title Deployment Diagram: NeoVex Runtime Infrastructure
+' Version: 0.1.0 — update when deployment topology changes
+' Reading guide: nodes = machines/environments, artifacts = binaries/files, arrows = network calls
+
+node "Local Machine (NixOS)" <<Developer Workstation — declarative config>> {
+
+  artifact "neovim" as NvimBin <<C binary — managed by nix>>
+  artifact "plugin.lua + libplugin.so" as NvimPlug <<Lua + Rust FFI via mlua>>
+  artifact "rust_agent_server" as RustExec <<cargo build --release — axum + tokio>>
+  artifact "agent_core.wasm" as Wasm <<Optional: wasm-bindgen — portable edge module>>
+  artifact "vector_db" as VecDB <<Qdrant / LanceDB — local RAG index>>
+  artifact "ollama" as OllamaLocal <<LAST RESORT fallback only — never preferred>>
+
+  note right of RustExec
+    Canonical crate stack:
+    rig, agentai, ADK-Rust, axum, tokio, mlua
+    Listens: localhost:7777
+    This is ORCHESTRATION — not inference.
+    All inference routes to cloud (Principle 7).
+  end note
+
+  note right of OllamaLocal
+    Activated ONLY when:
+    1. All cloud providers quota-exhausted, OR
+    2. Budget cap hit
+    UI must show prominent degradation warning.
+    Never a default. Never a preference.
+  end note
+
+  NvimBin --> NvimPlug : loads at startup via nix home-manager
+  NvimPlug --> RustExec : HTTP POST localhost:7777 (primary path)
+  RustExec ..> Wasm : optional edge compilation
+  RustExec --> VecDB : RAG queries (local fallback embedding)
+  RustExec ..> OllamaLocal : inference fallback (last resort)
+}
+
+cloud "Google Cloud" <<Primary Inference Provider — Cloud-First>> {
+  artifact "Gemini 3 Pro API" as GeminiAPI <<api.generativeai.google.com>>
+  artifact "Cloud Embedding API" as EmbedAPI <<text-embedding-3-large or Voyage AI>>
+}
+
+cloud "Other Cloud Providers" <<Secondary / Tertiary Fallback>> {
+  artifact "Anthropic API (Claude)" as AnthropicAPI <<secondary>>
+  artifact "OpenAI API (GPT-4o)" as OpenAIAPI <<tertiary>>
+}
+
+node "Antigravity Instance" <<Dev-time Only — NOT runtime>> {
+  artifact "Antigravity IDE" as AG <<VS Code fork — research + PR review>>
+  note right of AG
+    Used by both collaborators for research.
+    NOT required at runtime.
+    Provides: research env, PR review,
+    OAuth token flow for Gemini.
+    Decommissioned from runtime path entirely.
+  end note
+}
+
+database "External Data Sources" <<MCP-connected — external data layer only>> {
+  artifact "Git Repos" as Git <<git MCP server>>
+  artifact "Filesystem" as FS <<filesystem MCP server>>
+  artifact "Web Search" as Web <<web search MCP server>>
+  artifact "LSP Bridge" as LSP <<Neovim LSP MCP server>>
+}
+
+node "CI/CD Pipeline" <<GitHub Actions>> {
+  artifact "PR submitted by AI Specialist" as PR <<proposal only — no merge authority>>
+  artifact "Code review by User" as Review <<User is sovereign — Principle 1 + 10>>
+  artifact "cargo build --release" as CargoBuild <<Rust compilation>>
+  artifact "nix flake check" as NixCheck <<reproducibility verification>>
+}
+
+' ─── Primary runtime connections ──────────────────────────────────────────────
+RustExec --> GeminiAPI : HTTPS (API key / OAuth) — PRIMARY inference
+RustExec --> EmbedAPI : HTTPS — cloud embedding (primary RAG path)
+RustExec ..> AnthropicAPI : HTTPS — secondary provider fallback
+RustExec ..> OpenAIAPI : HTTPS — tertiary provider fallback
+
+' ─── MCP external data connections ───────────────────────────────────────────
+RustExec ..> Git : MCP protocol — data only
+RustExec ..> FS : MCP protocol — data only
+RustExec ..> Web : MCP protocol — data only
+RustExec ..> LSP : MCP protocol — data only
+
+' ─── Dev-time connections ─────────────────────────────────────────────────────
+AG ..> RustExec : dev-time socket bridge (research/testing only)
+
+' ─── CI/CD flow ───────────────────────────────────────────────────────────────
+PR --> Review : User reviews Rust code
+Review --> CargoBuild : User approves → triggers build
+CargoBuild --> NixCheck : verify reproducibility
+NixCheck --> RustExec : deploy new binary
+
+note bottom
+  Deployment principles:
+  - Local machine = low-latency orchestration only (rust_agent_server)
+  - Cloud = ALL inference (Gemini primary, others as fallback)
+  - MCP servers = external data access only, not inference
+  - Ollama = local terminal fallback, never preferred
+  - NixOS declarative config = reproducible across machines
+  - API keys managed via sops-nix or agenix (never plaintext)
+  - WASM artifact = optional portability for edge/browser contexts
+  - Collaboration: AI Specialist PRs are proposals, User has sole merge authority
+end note
+
+@enduml

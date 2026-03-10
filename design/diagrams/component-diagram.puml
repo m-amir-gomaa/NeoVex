@@ -1,0 +1,68 @@
+@startuml
+title Component Diagram: NeoVex — Antigravity Agentic Integration into Neovim
+' Version: 0.1.0 — update this diagram whenever the architecture changes
+
+skinparam componentStyle uml2
+
+[Neovim Editor] as Neovim <<Lightweight Editor>>
+package "Neovim Extensions" {
+  [Custom Plugin (Lua/Rust)] as NvimPlugin <<mlua interop>>
+  [avante.nvim / opencode.nvim] as ExistingPlugins <<Proxy AI Workflows — Fallback>>
+}
+
+[Antigravity IDE] as AG <<VS Code Fork — Dev-time Only>>
+note bottom of AG
+  Used by both collaborators for research and implementation.
+  Features: Multi-agent orchestration, Gemini 3 Pro, browser context.
+  NOT required at runtime. NOT a local LLM (see Principle 11).
+end note
+
+package "Rust-Based Agentic Core (Principle 9)" {
+  [Rust Agent Server] as RustServer <<axum + tokio — localhost:7777>>
+  note right of RustServer
+    Canonical crate stack:
+    - rig: Agent pipelines
+    - agentai: LLM integration
+    - ADK-Rust: Modular agents
+    - axum: HTTP server
+    - tokio: Async runtime
+    - mlua: Lua/Neovim interop
+    This is the ORCHESTRATION layer.
+    All inference routes to cloud (Principle 7).
+  end note
+}
+
+[Gemini API] as Gemini <<Primary Cloud LLM — Cloud-First>>
+note bottom of Gemini
+  Primary inference layer (Principle 7).
+  Accessed via API keys or Antigravity OAuth.
+  Budget and quota tracked by model-router subsystem.
+end note
+
+[Ollama] as Ollama <<Local LLM — Last Resort Fallback Only>>
+note bottom of Ollama
+  Terminal fallback ONLY on quota exhaustion
+  or budget cap. Never a preference.
+  UI must indicate degraded mode prominently.
+end note
+
+interface "HTTP POST localhost:7777" as LocalAPI <<Primary Bridge>>
+interface "MCP Protocol" as MCP <<External Data Layer Only>>
+
+Neovim --> NvimPlugin : triggers commands
+NvimPlugin --> ExistingPlugins : fallback when rust_agent_server unavailable
+NvimPlugin --> LocalAPI : primary path — sends requests
+ExistingPlugins ..> AG : auth/proxy (optional)
+LocalAPI --> RustServer : delegates tasks
+RustServer --> Gemini : cloud inference (primary)
+RustServer ..> Ollama : fallback inference (last resort)
+RustServer ..> MCP : external data only (filesystem, git, web, LSP)
+AG .> RustServer : dev-time socket bridge
+
+package "Collaboration Workflow (Principle 10)" {
+  note "User: Implements Rust, reviews ALL code, sovereign approval\nAI Specialist: Designs logic, submits PRs — no merge authority\nBoth: Use Antigravity for research\nAll PRs = proposals until User explicitly approves" as CollabNote
+}
+CollabNote ..> RustServer
+CollabNote ..> NvimPlugin
+
+@enduml
