@@ -162,9 +162,9 @@ Using your research and this prior, draft `/design/mcp/mcp-integration-proposal.
 
 - Confirmation or revision of the ranked bridge architecture above based on your research findings
 - MCP Server Inventory: which specific MCP servers to support out of the box
-- Custom NeoVex MCP Servers: Neovim LSP bridge, NixOS flake introspection, learning-state resource server
+- Custom NeoVex MCP Servers: Neovim LSP bridge, Nix flake introspection (optional — for Nix users only), learning-state resource server
 - Budget and Quota Governance for MCP Sampling: concrete mechanism for routing Sampling calls through the cloud-first layer
-- NixOS Packaging Strategy: declarative configuration schema for MCP servers
+- Nix Packaging Strategy: declarative configuration schema for MCP servers via flake, with an equivalent TOML/YAML config for non-Nix users
 - Phased Adoption Roadmap if full integration is complex
 
 Present to the user. Iterate on feedback. Commit final approved version with: `docs: finalize MCP integration proposal — approved by user`.
@@ -177,8 +177,8 @@ Present to the user. Iterate on feedback. Commit final approved version with: `d
 
 Research the following topics and write findings to `/design/step-1.1-research-summary.md`:
 
-**1.1.a — NixOS/Neovim Integration Landscape**
-Research the current state of AI tooling deeply integrated with NixOS declarative configurations and Neovim as a primary interface. Investigate: How do existing tools (avante.nvim, CodeCompanion, llm.nvim) handle model routing? NixOS-specific constraints and advantages (reproducibility, nix flakes, home-manager modules)? What does "optimized for NixOS/Neovim" mean concretely — daemon management via systemd/nix services, Lua plugin APIs, LSP integration points.
+**1.1.a — Nix/Neovim Integration Landscape**
+Research the current state of AI tooling integrated with Nix and Neovim. Investigate: How do existing tools (avante.nvim, CodeCompanion, llm.nvim) handle model routing? What are the Nix-specific advantages for packaging and configuration (reproducibility, nix flakes, home-manager modules) and how do they apply to a project that must also run without Nix? What does "Nix-first but distro-agnostic" mean concretely in terms of daemon management, config schema design, and installation UX? Research how other developer tools handle dual installation paths (Nix flake vs. manual) without forking their configuration model.
 
 **1.1.b — ERS (External Reasoning System) Architecture**
 Research multi-step agentic reasoning systems as they apply to developer tools. ReAct-style reasoning loops, tool-use frameworks, chain-of-thought orchestration, LangGraph/AutoGen/CrewAI multi-agent coordination. What latency and reliability considerations arise when ERS reasoning loops depend on cloud API round-trips? Cross-reference MCP research from Directive Zero — incorporate MCP's role in ERS tool execution. Evaluate the Rust crate stack (rig, agentai, ADK-Rust) against alternatives and confirm suitability.
@@ -201,13 +201,13 @@ After completing research, commit with: `docs: add research summary for NeoVex i
 Using research findings and the approved MCP integration proposal, draft the full `IDEALS.md` vision document. Save first as `/design/step-1.2-vision-draft.md`.
 
 **Section 1 — Project Identity and Philosophy**
-What is NeoVex? What problem does it solve? Core design values: cloud-first inference, developer sovereignty over routing and budget, NixOS reproducibility, MCP-native tool extensibility, learning-oriented interaction design, Rust-first implementation. Document explicitly that NeoVex is a cloud-native AI orchestration layer that uses local compute only when cloud access is exhausted or budget-capped. Document the two-person development model (Principle 10) as part of the project identity.
+What is NeoVex? What problem does it solve? Core design values: cloud-first inference, developer sovereignty over routing and budget, Nix-first reproducibility (without NixOS coupling), MCP-native tool extensibility, learning-oriented interaction design, Rust-first implementation. Document explicitly that NeoVex is a cloud-native AI orchestration layer that uses local compute only when cloud access is exhausted or budget-capped. Document that NeoVex runs on any Linux distribution — Nix is the preferred packaging and configuration mechanism but is never a hard requirement. Document the two-person development model (Principle 10) as part of the project identity.
 
-**Section 2 — NixOS/Neovim Integration Ideals**
-Ideal end-state of NeoVex's integration with NixOS and Neovim. Include: NixOS flake/home-manager declaration (API keys and budget configs managed via sops-nix or agenix), Neovim surface (keybindings, UI, LSP hooks, floating windows, statusline with live active model/provider/budget indicator), background service management (cloud API proxy/caching daemon, MCP server processes, vector DB, indexing daemons), NixOS reproducibility guarantees.
+**Section 2 — Nix / Linux Integration Ideals**
+Ideal end-state of NeoVex's integration with Nix and Linux. The primary installation target uses Nix flakes and home-manager for declarative configuration (API keys and budget configs managed via sops-nix or agenix), but this is a convenience path, not a hard requirement. Document both paths explicitly: (a) Nix path — flake declaration, home-manager module, reproducible across machines; (b) plain-Linux path — manual config file, systemd user services, documented installation steps for non-Nix distros. Both paths must be first-class. Neovim surface (keybindings, UI, LSP hooks, floating windows, statusline with live active model/provider/budget indicator) and background service management (cloud API proxy/caching daemon, MCP server processes, vector DB, indexing daemons) must work identically on both paths.
 
 **Section 3 — MCP Integration Ideals**
-Using the approved MCP integration proposal from Directive Zero, describe the ideal end-state of NeoVex's MCP architecture. Include: MCP's role as external data layer (not primary ERS tool path), canonical bundled MCP servers, custom NeoVex MCP servers and what they expose, MCP Sampling governance under cloud-first budget enforcement, user extension via declarative NixOS configuration, security and sandboxing model.
+Using the approved MCP integration proposal from Directive Zero, describe the ideal end-state of NeoVex's MCP architecture. Include: MCP's role as external data layer (not primary ERS tool path), canonical bundled MCP servers, custom NeoVex MCP servers and what they expose, MCP Sampling governance under cloud-first budget enforcement, user extension via declarative Nix configuration (with a fallback config-file mechanism for non-Nix users), security and sandboxing model.
 
 **Section 4 — ERS (External Reasoning System) Ideals**
 Ideal multi-step agentic reasoning system built on the Rust crate stack. Reasoning loop architecture using `rig` pipelines, tool set executed via `agentai` ToolCaller (with MCP for external data), error recovery, real-time reasoning communication to user in Neovim, parallelism via sub-agents using `ADK-Rust`. All ERS reasoning steps default to the highest-capability cloud model. If cloud quota is exhausted mid-task: (a) switch to next cloud provider, (b) continue on local Ollama with quality-degradation warning, or (c) abort and preserve state for resumption.

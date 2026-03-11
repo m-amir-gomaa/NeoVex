@@ -1,6 +1,6 @@
 # NeoVex
 
-> A cloud-native AI orchestration layer for Neovim, built in Rust, optimized for NixOS.
+> A cloud-native AI orchestration layer for Neovim, built in Rust, runs on any Linux distribution.
 
 ---
 
@@ -8,9 +8,9 @@
 
 Most AI coding tools are built for the IDE majority — VS Code users, GUI workflows, managed environments. They assume you want a polished product that abstracts away how everything works underneath. NeoVex is built on the opposite assumption.
 
-If you live in Neovim and run NixOS, you already made a deliberate choice: you want to understand your tools, compose them yourself, and own your environment completely. AI assistance shouldn't break that contract. It should fit into it.
+If you live in Neovim and care about owning your environment — whether that's NixOS, Arch, Fedora, or anything else — you already made a deliberate choice: you want to understand your tools, compose them yourself, and not be locked into someone else's decisions. AI assistance shouldn't break that contract. It should fit into it.
 
-NeoVex brings agentic AI capabilities — multi-step reasoning, tool execution, codebase retrieval, context-aware mentorship — directly into Neovim, without requiring you to open a different editor or surrender control of your workflow. The entire system is declared in your NixOS config, reproducible across machines, and always within your budget because you set the budget.
+NeoVex brings agentic AI capabilities — multi-step reasoning, tool execution, codebase retrieval, context-aware mentorship — directly into Neovim, without requiring you to open a different editor or surrender control of your workflow. The system is designed to be reproducible, portable, and always within your budget because you set the budget.
 
 It's also built as a learning project. The author is actively studying systems programming and computer science while building this. NeoVex is designed to teach as it assists — not by hiding complexity, but by surfacing it at the right depth for someone who already understands memory, processes, and the Linux kernel, but is still mapping that knowledge onto software architecture and AI systems.
 
@@ -31,7 +31,7 @@ The goal is not a port. It is a reimplementation from better foundations:
 | **Runtime** | Node.js / Python | Rust — no GIL, true concurrency |
 | **Agent logic** | Lives inside the IDE process | Standalone Rust server — editor-agnostic |
 | **Model coupling** | Tied to Gemini | Provider-agnostic — Gemini, Claude, GPT-4, or any future model |
-| **Configuration** | GUI settings, not reproducible | NixOS-native — entire system declared in your flake |
+| **Configuration** | GUI settings, not reproducible | Nix-first — declarative config via flake, but usable on any Linux distro |
 | **Budget control** | Opaque | Full user control over model hierarchy, costs, and fallback behaviour |
 
 **Antigravity features NeoVex targets, in priority order:**
@@ -54,7 +54,7 @@ Where NeoVex goes further: the orchestration layer is a standalone Rust binary, 
 - **Cloud-first model routing** — always uses the best available cloud model (Gemini, Claude, GPT-4), falls back to local Ollama only when quotas are exhausted or a budget cap is hit, and tells you loudly when it does
 - **RAG over your codebase** — indexes your project and retrieves relevant context before every inference call, using cloud embedding APIs with local fallback
 - **MCP integration** — connects to external data sources (filesystem, git, web, LSP) via the Model Context Protocol, extending agent capabilities without coupling to any single provider
-- **NixOS-native** — the entire system, including API keys, budget limits, model preferences, and background service configuration, is declared in your flake and managed by home-manager
+- **Nix-first, distro-agnostic** — the preferred installation path uses the Nix package manager for reproducible, declarative configuration of API keys, budget limits, model preferences, and background services; but NeoVex runs on any Linux distribution without Nix if you prefer to manage it yourself
 - **Learning-oriented** — explanation depth adapts to your knowledge level; the system knows what you already know and builds on it rather than starting from scratch
 
 ---
@@ -65,9 +65,9 @@ NeoVex is a long-horizon project. It won't be finished in a month or a year. Her
 
 **Near term (months 1–6):** The agentic core gets built — the Rust server, the Neovim bridge, the model router, the basic RAG pipeline. This phase is about getting something that works end-to-end for a single task, not something feature-complete. The architecture decisions are being made now, carefully, so they don't need to be unmade later.
 
-**Medium term (year 1–2):** The system deepens. MCP integration matures. The mentorship subsystem develops a real model of what the user knows and what they're learning. Multi-agent parallelism becomes practical. NixOS packaging becomes polished enough that someone else could install it from a flake with minimal friction.
+**Medium term (year 1–2):** The system deepens. MCP integration matures. The mentorship subsystem develops a real model of what the user knows and what they're learning. Multi-agent parallelism becomes practical. Nix packaging becomes polished enough that someone else could install it from a flake with minimal friction, while plain-Linux installation paths get documented and tested.
 
-**Longer term (years 2–5):** NeoVex becomes a real alternative for the class of developer who finds Neovim + NixOS to be the right environment. The plugin ecosystem grows. Other people contribute MCP servers, model router configurations, RAG strategies. The mentorship system accumulates enough translation mappings to be genuinely useful for CS learners coming from a systems background.
+**Longer term (years 2–5):** NeoVex becomes a real alternative for any developer who finds Neovim to be the right environment, regardless of which Linux distribution they run. The plugin ecosystem grows. Other people contribute MCP servers, model router configurations, RAG strategies. The mentorship system accumulates enough translation mappings to be genuinely useful for CS learners coming from a systems background.
 
 **Further out:** Unclear and intentionally so. The goal is not to ship a product — it is to build something that remains useful, composable, and honest about what it is for as long as someone finds value in it. If the AI landscape shifts completely in three years, NeoVex should be architected loosely enough to shift with it.
 
