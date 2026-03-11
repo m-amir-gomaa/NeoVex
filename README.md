@@ -16,6 +16,38 @@ It's also built as a learning project. The author is actively studying systems p
 
 ---
 
+## Relation to Antigravity
+
+[Antigravity](https://deepmind.google/antigravity) is Google's agent-first IDE — a fork of VS Code built around Gemini 3 Pro, with multi-agent orchestration, browser integration, workspace-aware reasoning, and deep task delegation baked into the editor itself. It represents the current ceiling of what an AI-native development environment looks like.
+
+NeoVex is an explicit attempt to replicate most of Antigravity's capabilities — and where possible, exceed them — but entirely within the Neovim ecosystem, without the VS Code dependency, and with a fundamentally different architecture underneath.
+
+The goal is not a port. It is a reimplementation from better foundations:
+
+| | Antigravity | NeoVex |
+|---|---|---|
+| **Editor base** | Electron / VS Code | Neovim — no GUI framework overhead |
+| **Source** | Closed, Google-controlled | GPL v3 — permanently open |
+| **Runtime** | Node.js / Python | Rust — no GIL, true concurrency |
+| **Agent logic** | Lives inside the IDE process | Standalone Rust server — editor-agnostic |
+| **Model coupling** | Tied to Gemini | Provider-agnostic — Gemini, Claude, GPT-4, or any future model |
+| **Configuration** | GUI settings, not reproducible | NixOS-native — entire system declared in your flake |
+| **Budget control** | Opaque | Full user control over model hierarchy, costs, and fallback behaviour |
+
+**Antigravity features NeoVex targets, in priority order:**
+
+- **Multi-agent orchestration** — parallel sub-agents working on decomposed tasks simultaneously
+- **Workspace-aware reasoning** — the agent understands your entire codebase, not just the open file
+- **Task delegation** — break a high-level instruction into sub-tasks, execute them, reconcile results
+- **Browser integration** — agents that can fetch documentation, search, and read external context
+- **Inline code generation and editing** — suggestions applied directly to buffers with diff preview
+- **Persistent agent memory** — context that survives across sessions, not just the current conversation
+- **Learning and explanation mode** — adaptive depth, reasoning exposed rather than hidden
+
+Where NeoVex goes further: the orchestration layer is a standalone Rust binary, fully decoupled from any editor. Neovim is the first-class target, but any editor that speaks HTTP can use it. Antigravity is architecturally inseparable from VS Code. NeoVex is not inseparable from anything.
+
+---
+
 ## What It Does
 
 - **Agentic reasoning in Neovim** — multi-step AI tasks (refactor, explain, debug, generate) that run as background agents, report progress live, and apply changes to your buffers
