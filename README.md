@@ -94,21 +94,27 @@ The full vision document (`IDEALS.md`) will be written and locked after the idea
 
 ---
 
+## Community
+
+**Mailing list:** [neovex-dev@googlegroups.com](https://groups.google.com/g/neovex-dev)
+This is the primary place for design discussions, research questions, contributor introductions, and announcements. Public archive, anyone can post by email without an account.
+
+**Where the relevant communities are:**
+- Agentic AI / LLM engineering — [r/LocalLLaMA](https://reddit.com/r/LocalLLaMA), [Hugging Face Discord](https://discord.gg/hugging-face)
+- Rust systems programming — [r/rust](https://reddit.com/r/rust), [Rust Discord](https://discord.gg/rust-lang)
+- Neovim — [r/neovim](https://reddit.com/r/neovim)
+
+---
+
 ## Contributing
 
 Not actively recruiting contributors yet — see [Status](#status).
 
-When the learning roadmap is complete and the vision is locked, I will
-begin seeking contributors with depth in: agentic AI systems research,
-Rust systems programming, Neovim plugin development, and RAG pipeline
-design. The specific open questions researchers can engage with now are
-in [RESEARCH.md](./RESEARCH.md).
+When the learning roadmap is complete and the vision is locked, I will begin seeking contributors with depth in: agentic AI systems research, Rust systems programming, Neovim plugin development, and RAG pipeline design. The specific open questions researchers can engage with now are in [RESEARCH.md](./RESEARCH.md).
 
-A few things to know before contributing when that time comes: I read
-every line of code before it merges, and I'll push back on anything I
-don't understand or don't agree with. That's not a gatekeeping stance —
-it's how I stay in command of what NeoVex is. If you submit a PR,
-expect a real review, not a rubber stamp.
+A few things to know before contributing when that time comes: I read every line of code before it merges, and I'll push back on anything I don't understand or don't agree with. That's not a gatekeeping stance — it's how I stay in command of what NeoVex is. If you submit a PR, expect a real review, not a rubber stamp.
+
+If you want to follow along or start a conversation before then, the [mailing list](https://groups.google.com/g/neovex-dev) is the right place.
 
 ---
 
