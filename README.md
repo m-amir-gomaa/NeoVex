@@ -96,19 +96,38 @@ The full vision document (`IDEALS.md`) will be written and locked after the idea
 
 ## Contributing
 
-I'm looking for contributors and researchers who want to work on this seriously.
+Not actively recruiting contributors yet — see [Status](#status).
 
-NeoVex is not a weekend project and it's not looking for drive-by patches. The areas where outside thinking would genuinely move the project forward are: agentic AI systems research (reasoning loops, tool use, multi-agent coordination), Rust systems programming, Neovim plugin development, and RAG pipeline design. If you have depth in any of those and you find this project interesting, I want to hear from you.
+When the learning roadmap is complete and the vision is locked, I will
+begin seeking contributors with depth in: agentic AI systems research,
+Rust systems programming, Neovim plugin development, and RAG pipeline
+design. The specific open questions researchers can engage with now are
+in [RESEARCH.md](./RESEARCH.md).
 
-A few things to know before contributing: I read every line of code before it merges, and I'll push back on anything I don't understand or don't agree with. That's not a gatekeeping stance — it's how I ensure I stay in command of what NeoVex is and how it works. If you submit a PR, expect a real review, not a rubber stamp.
-
-The project is in early architecture phase. The best time to get involved in the design is now, before decisions are locked. Open an issue or reach out directly.
+A few things to know before contributing when that time comes: I read
+every line of code before it merges, and I'll push back on anything I
+don't understand or don't agree with. That's not a gatekeeping stance —
+it's how I stay in command of what NeoVex is. If you submit a PR,
+expect a real review, not a rubber stamp.
 
 ---
 
 ## Status
 
-Early architecture phase. The idealization protocol is running. No production code yet.
+**Intentionally stalled — learning phase in progress.**
+
+No implementation code will be written until the learning roadmap in
+[ROADMAP.md](./ROADMAP.md) is complete. That means Rust fundamentals
+(~4 weeks) followed by agentic AI foundations (~4 weeks). The
+architecture design and vision lock via the Antigravity protocol runs
+concurrently since it is documentation, not code.
+
+Contributors and researchers are not being actively recruited yet.
+When the learning roadmap is complete and `IDEALS.md` is canonized,
+that changes. See [ROADMAP.md](./ROADMAP.md) for when and how.
+
+Open questions that researchers can engage with now are in
+[RESEARCH.md](./RESEARCH.md).
 
 ---
 
