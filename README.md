@@ -8,11 +8,13 @@
 
 Most AI coding tools are built for the IDE majority — VS Code users, GUI workflows, managed environments. They assume you want a polished product that abstracts away how everything works underneath. NeoVex is built on the opposite assumption.
 
-If you live in Neovim and care about owning your environment — whether that's NixOS, Arch, Fedora, or anything else — you already made a deliberate choice: you want to understand your tools, compose them yourself, and not be locked into someone else's decisions. AI assistance shouldn't break that contract. It should fit into it.
+I live in Neovim and I care about owning my environment. AI assistance shouldn't break that contract — it should fit into it. NeoVex is my attempt to bring the full capability of agentic AI directly into Neovim, on any Linux distribution, without surrendering control of how it works underneath.
 
-NeoVex brings agentic AI capabilities — multi-step reasoning, tool execution, codebase retrieval, context-aware mentorship — directly into Neovim, without requiring you to open a different editor or surrender control of your workflow. The system is designed to be reproducible, portable, and always within your budget because you set the budget.
+I'm building this while actively learning. I'm currently studying Rust and taking courses on agentic AI systems — the architecture of NeoVex is being designed in parallel with my own understanding of it deepening. Antigravity is my primary development environment for building NeoVex itself; the agent-assisted workflow I'm trying to replicate for Neovim users is the same one I'm using to build it. That's intentional — it means every capability I implement is one I've personally depended on and understand from the inside.
 
-It's also built as a learning project. The author is actively studying systems programming and computer science while building this. NeoVex is designed to teach as it assists — not by hiding complexity, but by surfacing it at the right depth for someone who already understands memory, processes, and the Linux kernel, but is still mapping that knowledge onto software architecture and AI systems.
+I review every line of code before it gets pushed. This is not a project where commits get merged without being read. I'd rather ship slowly and understand everything in the codebase than move fast and accumulate code I can't reason about. That standard will not change as the project grows.
+
+NeoVex is also designed to teach as it assists — not by hiding complexity, but by surfacing it at the right depth. I come from a systems background (CSAPP, Linux internals) and I'm still mapping that knowledge onto software architecture and AI systems. The mentorship layer reflects that journey: it builds on what you already know rather than starting from scratch.
 
 ---
 
@@ -63,11 +65,11 @@ Where NeoVex goes further: the orchestration layer is a standalone Rust binary, 
 
 NeoVex is a long-horizon project. It won't be finished in a month or a year. Here is the honest trajectory:
 
-**Near term (months 1–6):** The agentic core gets built — the Rust server, the Neovim bridge, the model router, the basic RAG pipeline. This phase is about getting something that works end-to-end for a single task, not something feature-complete. The architecture decisions are being made now, carefully, so they don't need to be unmade later.
+**Near term (months 1–6):** The agentic core gets built — the Rust server, the Neovim bridge, the model router, the basic RAG pipeline. This phase is about getting something that works end-to-end for a single task, not something feature-complete. I'm making the architecture decisions now, carefully, so they don't need to be unmade later.
 
-**Medium term (year 1–2):** The system deepens. MCP integration matures. The mentorship subsystem develops a real model of what the user knows and what they're learning. Multi-agent parallelism becomes practical. Nix packaging becomes polished enough that someone else could install it from a flake with minimal friction, while plain-Linux installation paths get documented and tested.
+**Medium term (year 1–2):** The system deepens. MCP integration matures. The mentorship subsystem develops a real model of what I know and what I'm learning. Multi-agent parallelism becomes practical. Nix packaging becomes polished enough that someone else could install it from a flake with minimal friction, while plain-Linux installation paths get documented and tested.
 
-**Longer term (years 2–5):** NeoVex becomes a real alternative for any developer who finds Neovim to be the right environment, regardless of which Linux distribution they run. The plugin ecosystem grows. Other people contribute MCP servers, model router configurations, RAG strategies. The mentorship system accumulates enough translation mappings to be genuinely useful for CS learners coming from a systems background.
+**Longer term (years 2–5):** NeoVex becomes a real alternative for any developer who finds Neovim to be the right environment, regardless of which Linux distribution they run. The plugin ecosystem grows. Contributors bring MCP servers, model router configurations, RAG strategies. The mentorship system accumulates enough translation mappings to be genuinely useful for learners coming from a systems background.
 
 **Further out:** Unclear and intentionally so. The goal is not to ship a product — it is to build something that remains useful, composable, and honest about what it is for as long as someone finds value in it. If the AI landscape shifts completely in three years, NeoVex should be architected loosely enough to shift with it.
 
@@ -89,6 +91,18 @@ Four canonical architecture diagrams live in [`/design/diagrams/`](./design/diag
 | `deployment-diagram.puml` | Runtime topology across local machine and cloud |
 
 The full vision document (`IDEALS.md`) will be written and locked after the idealization protocol completes. The protocol itself lives in [`NeoVex-Antigravity-Prompt-v0_1_0.md`](./NeoVex-Antigravity-Prompt-v0_1_0.md).
+
+---
+
+## Contributing
+
+I'm looking for contributors and researchers who want to work on this seriously.
+
+NeoVex is not a weekend project and it's not looking for drive-by patches. The areas where outside thinking would genuinely move the project forward are: agentic AI systems research (reasoning loops, tool use, multi-agent coordination), Rust systems programming, Neovim plugin development, and RAG pipeline design. If you have depth in any of those and you find this project interesting, I want to hear from you.
+
+A few things to know before contributing: I read every line of code before it merges, and I'll push back on anything I don't understand or don't agree with. That's not a gatekeeping stance — it's how I ensure I stay in command of what NeoVex is and how it works. If you submit a PR, expect a real review, not a rubber stamp.
+
+The project is in early architecture phase. The best time to get involved in the design is now, before decisions are locked. Open an issue or reach out directly.
 
 ---
 
